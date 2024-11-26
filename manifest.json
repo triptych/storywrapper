@@ -1,0 +1,70 @@
+{
+    "name": "StoryWrapper",
+    "short_name": "StoryWrapper",
+    "description": "A modern, progressive web application for writing and publishing novels",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0066cc",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512x512.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "New Story",
+            "short_name": "New",
+            "description": "Create a new story",
+            "url": "/?action=new",
+            "icons": [{ "src": "/icons/new-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
+        },
+        {
+            "name": "Continue Writing",
+            "short_name": "Continue",
+            "description": "Continue your last story",
+            "url": "/?action=continue",
+            "icons": [{ "src": "/icons/continue-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
+        }
+    ],
+    "categories": ["productivity", "writing", "books"],
+    "screenshots": [
+        {
+            "src": "/screenshots/editor.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "Editor interface of StoryWrapper"
+        },
+        {
+            "src": "/screenshots/preview.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "Preview mode showing the story layout"
+        }
+    ],
+    "prefer_related_applications": false,
+    "related_applications": [],
+    "features": [
+        "Cross Platform",
+        "Offline Support",
+        "Responsive",
+        "Fast",
+        "Installable"
+    ],
+    "dir": "ltr",
+    "lang": "en",
+    "scope": "/",
+    "display_override": ["window-controls-overlay"]
+}

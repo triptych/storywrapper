@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="StoryWrapper - A modern web application for writing and publishing novels">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)">
+    <title>StoryWrapper</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.svg">
+
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="css/main.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Defer non-critical JavaScript -->
+    <script src="js/app.js" type="module" defer></script>
+</head>
+<body>
+    <!-- Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- App Shell -->
+    <div class="app-shell">
+        <!-- Header -->
+        <header class="app-header" role="banner">
+            <div class="header-content">
+                <h1>StoryWrapper</h1>
+                <nav class="main-nav" role="navigation" aria-label="Main navigation">
+                    <button class="menu-toggle" aria-expanded="false" aria-controls="main-menu">
+                        <span class="sr-only">Toggle menu</span>
+                        <span class="menu-icon"></span>
+                    </button>
+                    <ul id="main-menu" class="nav-list">
+                        <li><a href="#editor" class="nav-link">Editor</a></li>
+                        <li><a href="#preview" class="nav-link">Preview</a></li>
+                        <li><a href="#settings" class="nav-link">Settings</a></li>
+                    </ul>
+                </nav>
+                <div class="app-controls">
+                    <button class="theme-toggle" aria-label="Toggle theme">
+                        <span class="sr-only">Toggle light/dark theme</span>
+                    </button>
+                    <button class="font-toggle" aria-label="Change font">
+                        <span class="sr-only">Change font family</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content" role="main">
+            <div class="editor-container">
+                <!-- Editor Section -->
+                <section id="editor" class="editor-section" aria-label="Story editor">
+                    <div class="editor-toolbar" role="toolbar" aria-label="Editor controls">
+                        <button class="toolbar-btn" aria-label="Bold">B</button>
+                        <button class="toolbar-btn" aria-label="Italic">I</button>
+                        <button class="toolbar-btn" aria-label="Heading">H</button>
+                        <span class="word-count" aria-live="polite">0 words</span>
+                    </div>
+                    <div class="editor-wrapper">
+                        <textarea id="markdown-editor"
+                                class="markdown-editor"
+                                aria-label="Markdown editor"
+                                placeholder="Start writing your story..."></textarea>
+                    </div>
+                </section>
+
+                <!-- Preview Section -->
+                <section id="preview" class="preview-section" aria-label="Story preview">
+                    <div class="preview-controls">
+                        <button class="preview-mode-toggle" aria-label="Toggle preview mode">
+                            Preview Mode
+                        </button>
+                    </div>
+                    <div class="preview-content">
+                        <!-- Preview content will be injected here -->
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Settings Panel -->
+        <aside id="settings" class="settings-panel" aria-label="Settings panel" hidden>
+            <div class="settings-content">
+                <h2>Settings</h2>
+                <form class="settings-form">
+                    <fieldset>
+                        <legend>Appearance</legend>
+                        <div class="form-group">
+                            <label for="theme-select">Theme</label>
+                            <select id="theme-select" name="theme">
+                                <option value="system">System</option>
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="font-select">Font</label>
+                            <select id="font-select" name="font">
+                                <option value="serif">Merriweather</option>
+                                <option value="sans-serif">Inter</option>
+                            </select>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Accessibility</legend>
+                        <div class="form-group">
+                            <label for="motion-toggle">Reduce motion</label>
+                            <input type="checkbox" id="motion-toggle" name="reduce-motion">
+                        </div>
+                        <div class="form-group">
+                            <label for="contrast-toggle">High contrast</label>
+                            <input type="checkbox" id="contrast-toggle" name="high-contrast">
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Status Bar -->
+        <footer class="status-bar" role="contentinfo">
+            <div class="status-content">
+                <span class="save-status" aria-live="polite">All changes saved</span>
+                <span class="connection-status" aria-live="polite">Online</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading-overlay" aria-hidden="true" hidden>
+        <div class="loading-spinner" role="alert" aria-label="Loading">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</body>
+</html>
