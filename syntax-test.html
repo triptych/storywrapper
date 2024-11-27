@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Markdown Syntax Test</title>
+</head>
+<body>
+    <div id="content"></div>
+    <script type="module">
+        import { markdownToHtml } from './js/utils/markdown.js';
+
+        async function loadAndProcessMarkdown() {
+            try {
+                const response = await fetch('syntax-test.md');
+                const markdown = await response.text();
+                const html = await markdownToHtml(markdown);
+                document.getElementById('content').innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        loadAndProcessMarkdown();
+    </script>
+</body>
+</html>
