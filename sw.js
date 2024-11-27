@@ -1,4 +1,4 @@
-const CACHE_NAME = 'storywrapper-v1';
+const CACHE_NAME = 'storywrapper-v2'; // Incremented version
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [

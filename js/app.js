@@ -36,8 +36,24 @@ class App {
     }
 
     setupEventListeners() {
-        // Navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
+        // Settings toggle
+        const settingsToggle = document.querySelector('.settings-toggle');
+        settingsToggle?.addEventListener('click', () => {
+            this.settings.toggle();
+            settingsToggle.setAttribute('aria-expanded',
+                settingsToggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'
+            );
+        });
+
+        // Close settings button
+        const closeSettings = document.querySelector('.close-settings');
+        closeSettings?.addEventListener('click', () => {
+            this.settings.close();
+            document.querySelector('.settings-toggle').setAttribute('aria-expanded', 'false');
+        });
+
+        // Navigation (excluding settings button)
+        document.querySelectorAll('.nav-link:not(.settings-toggle)').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const targetId = e.target.getAttribute('href').substring(1);
@@ -144,11 +160,15 @@ class App {
         if ((e.ctrlKey || e.metaKey) && e.key === ',') {
             e.preventDefault();
             this.settings.toggle();
+            document.querySelector('.settings-toggle').setAttribute('aria-expanded',
+                document.querySelector('.settings-toggle').getAttribute('aria-expanded') === 'true' ? 'false' : 'true'
+            );
         }
 
         // Esc to close modals/panels
         if (e.key === 'Escape') {
             this.settings.close();
+            document.querySelector('.settings-toggle').setAttribute('aria-expanded', 'false');
         }
     }
 

@@ -41,7 +41,7 @@
                     <ul id="main-menu" class="nav-list">
                         <li><a href="#editor" class="nav-link">Editor</a></li>
                         <li><a href="#preview" class="nav-link">Preview</a></li>
-                        <li><a href="#settings" class="nav-link">Settings</a></li>
+                        <li><button type="button" class="nav-link settings-toggle" aria-controls="settings" aria-expanded="false">Settings</button></li>
                     </ul>
                 </nav>
                 <div class="app-controls">
@@ -90,6 +90,7 @@
 
         <!-- Settings Panel -->
         <aside id="settings" class="settings-panel" aria-label="Settings panel" hidden>
+            <button class="close-settings" aria-label="Close settings">×</button>
             <div class="settings-content">
                 <h2>Settings</h2>
                 <form class="settings-form">
