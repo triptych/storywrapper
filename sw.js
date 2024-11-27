@@ -1,11 +1,12 @@
-const CACHE_NAME = 'storywrapper-v2'; // Incremented version
+const CACHE_NAME = 'storywrapper-v7';
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
     '/',
     '/index.html',
-    '/css/main.css',
+    'index.html',
     '/js/app.js',
+    'js/app.js',
     '/js/modules/editor.js',
     '/js/modules/preview.js',
     '/js/modules/settings.js',
@@ -15,6 +16,7 @@ const STATIC_ASSETS = [
     '/js/utils/helpers.js',
     '/js/utils/markdown.js',
     '/manifest.json',
+    'manifest.json',
     '/icons/icon-192x192.svg',
     '/icons/icon-512x512.svg',
     '/icons/badge-72x72.svg',
@@ -32,26 +34,36 @@ self.addEventListener('install', event => {
     );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and take control
 self.addEventListener('activate', event => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames
-                    .filter(name => name !== CACHE_NAME)
-                    .map(name => caches.delete(name))
-            );
-        }).then(() => self.clients.claim())
+        Promise.all([
+            caches.keys().then(cacheNames => {
+                return Promise.all(
+                    cacheNames
+                        .filter(name => name !== CACHE_NAME)
+                        .map(name => caches.delete(name))
+                );
+            }),
+            self.clients.claim()
+        ])
     );
 });
 
-// Fetch event - serve from cache, falling back to network
+// Fetch event - bypass cache for CSS, use cache for others
 self.addEventListener('fetch', event => {
     // Skip cross-origin requests
     if (!event.request.url.startsWith(self.location.origin)) {
         return;
     }
 
+    // For CSS files, always go to network and don't cache
+    if (event.request.url.includes('.css')) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
+
+    // Cache-first strategy for other assets
     event.respondWith(
         caches.match(event.request)
             .then(response => {
@@ -149,12 +161,9 @@ self.addEventListener('message', event => {
 
 // Utility function to sync content
 async function syncContent() {
-    // Implement content syncing logic here
-    // This could involve sending cached changes to a server
     const cache = await caches.open(CACHE_NAME);
     const requests = await cache.keys();
 
-    // Process each cached request
     return Promise.all(
         requests.map(async request => {
             if (request.url.includes('/api/')) {

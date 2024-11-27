@@ -3,6 +3,7 @@ export class ServiceWorkerManager {
         this.registration = null;
         this.updateAvailable = false;
         this.vapidPublicKey = null; // Will be set when/if provided
+        this.cssVersion = Date.now(); // Add timestamp for CSS versioning
     }
 
     async register() {
@@ -20,6 +21,9 @@ export class ServiceWorkerManager {
 
             // Setup sync handling
             this.setupSyncHandling();
+
+            // Setup CSS refresh handling
+            this.setupCssRefreshHandling();
 
             console.log('ServiceWorker registered successfully');
 
@@ -45,9 +49,37 @@ export class ServiceWorkerManager {
         // Listen for controller change
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (this.updateAvailable) {
+                this.refreshCSS(); // Refresh CSS when service worker updates
                 window.location.reload();
             }
         });
+    }
+
+    setupCssRefreshHandling() {
+        // Monitor page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                this.refreshCSS();
+            }
+        });
+
+        // Refresh CSS on page load
+        if (document.readyState === 'complete') {
+            this.refreshCSS();
+        } else {
+            window.addEventListener('load', () => this.refreshCSS());
+        }
+    }
+
+    refreshCSS() {
+        const links = document.getElementsByTagName('link');
+        for (let link of links) {
+            if (link.rel === 'stylesheet') {
+                const href = link.href.split('?')[0];
+                link.href = `${href}?v=${this.cssVersion}`;
+                this.cssVersion = Date.now(); // Update version for next refresh
+            }
+        }
     }
 
     setupSyncHandling() {

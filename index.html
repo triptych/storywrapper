@@ -12,8 +12,9 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.svg">
 
-    <!-- Critical CSS -->
-    <link rel="stylesheet" href="css/main.css">
+    <!-- Critical CSS with cache-busting -->
+    <link rel="stylesheet" href="css/main.css?v=1" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="css/main.css?v=1"></noscript>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
