@@ -96,7 +96,7 @@ class App {
             // Load saved settings
             const savedSettings = await this.storage.get('settings');
             if (savedSettings) {
-                this.settings.apply(savedSettings);
+                this.settings.applySettings(savedSettings);
             }
         } catch (error) {
             console.error('Error loading saved state:', error);

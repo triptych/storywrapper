@@ -16,6 +16,15 @@ export class Preview {
 
         // Create navigation controls
         this.createNavigationControls();
+
+        // Add export button
+        const previewControls = document.querySelector('.preview-controls');
+        const exportButton = document.createElement('button');
+        exportButton.className = 'export-button';
+        exportButton.setAttribute('aria-label', 'Export as HTML');
+        exportButton.textContent = 'Export HTML';
+        exportButton.addEventListener('click', () => this.exportHTML());
+        previewControls.appendChild(exportButton);
     }
 
     setupEventListeners() {
@@ -153,6 +162,72 @@ export class Preview {
             heading.id = chapter.id;
             heading.setAttribute('tabindex', '-1');
         });
+    }
+
+    async exportHTML() {
+        try {
+            // Show loading state
+            this.announceToScreenReader('Preparing export...');
+
+            // Get the CSS content
+            const cssLink = document.querySelector('link[href*="main.css"]');
+            const cssPath = cssLink.getAttribute('href').split('?')[0]; // Remove cache-busting query
+            const cssResponse = await fetch(cssPath);
+            if (!cssResponse.ok) throw new Error('Failed to load CSS');
+            const css = await cssResponse.text();
+
+            // Get the preview content
+            const content = this.element.innerHTML;
+            const title = document.querySelector('h1')?.textContent || 'Exported Story';
+
+            const htmlTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        ${css}
+        /* Export-specific styles */
+        :root {
+            --content-width: min(65ch, 100% - 2rem);
+        }
+        body {
+            max-width: var(--content-width);
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .preview-content {
+            background-color: var(--color-secondary-light);
+            padding: 2rem;
+            border-radius: 4px;
+        }
+        @media (prefers-color-scheme: dark) {
+            .preview-content {
+                background-color: var(--color-secondary-dark);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-content">
+        ${content}
+    </div>
+</body>
+</html>`;
+
+            // Download the file
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `story-${timestamp}.html`;
+            const { downloadFile } = await import('../utils/helpers.js');
+            downloadFile(htmlTemplate, filename, 'text/html');
+
+            // Announce success
+            this.announceToScreenReader('Story exported successfully');
+        } catch (error) {
+            console.error('Error exporting HTML:', error);
+            this.announceToScreenReader('Error exporting HTML file');
+        }
     }
 
     togglePreviewMode() {

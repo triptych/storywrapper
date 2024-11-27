@@ -8,6 +8,8 @@ export class Editor {
         this.wordCount = document.querySelector('.word-count');
         this.saveStatus = document.querySelector('.save-status');
         this.autosaveDelay = 1000; // 1 second
+        this.editorSection = document.querySelector('.editor-section');
+        this.zenModeButton = document.querySelector('[aria-label="Toggle Zen mode"]');
 
         this.setupEditor();
         this.setupToolbar();
@@ -41,6 +43,13 @@ export class Editor {
 
         // Initial auto-resize
         this.autoResize();
+
+        // Handle Escape key in Zen mode
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.editorSection.classList.contains('zen-mode')) {
+                this.toggleZenMode();
+            }
+        });
     }
 
     setupToolbar() {
@@ -60,6 +69,41 @@ export class Editor {
         toolbar.querySelector('[aria-label="Heading"]').addEventListener('click', () => {
             this.wrapSelection('### ', '');
         });
+
+        // Zen mode button
+        if (this.zenModeButton) {
+            this.zenModeButton.addEventListener('click', () => {
+                this.toggleZenMode();
+            });
+        }
+    }
+
+    toggleZenMode() {
+        this.editorSection.classList.toggle('zen-mode');
+        const isZenMode = this.editorSection.classList.contains('zen-mode');
+
+        if (this.zenModeButton) {
+            this.zenModeButton.setAttribute('aria-label', isZenMode ? 'Exit Zen mode' : 'Toggle Zen mode');
+        }
+
+        // Announce to screen readers
+        this.announceToScreenReader(isZenMode ? 'Entered Zen mode' : 'Exited Zen mode');
+
+        // Focus the editor in Zen mode
+        if (isZenMode) {
+            this.element.focus();
+        }
+    }
+
+    announceToScreenReader(message) {
+        const announcer = document.createElement('div');
+        announcer.className = 'sr-only';
+        announcer.setAttribute('role', 'status');
+        announcer.setAttribute('aria-live', 'polite');
+        announcer.textContent = message;
+
+        document.body.appendChild(announcer);
+        setTimeout(() => announcer.remove(), 1000);
     }
 
     async handleInput() {
