@@ -70,6 +70,20 @@ body {
     height: 100%;
 }
 
+/* List Styles */
+ul, ol {
+    padding-left: 2rem;
+    margin: 1rem 0;
+}
+
+ul ul, ul ol, ol ul, ol ol {
+    margin: 0.5rem 0;
+}
+
+li {
+    margin: 0.25rem 0;
+}
+
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
     body {
