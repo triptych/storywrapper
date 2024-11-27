@@ -403,6 +403,27 @@ li {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
+}
+
+.github-link {
+    color: var(--status-text-light);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color var(--transition-speed) var(--transition-timing);
+}
+
+.github-link:hover {
+    color: var(--color-accent-light);
+}
+
+@media (prefers-color-scheme: dark) {
+    .github-link {
+        color: var(--status-text-dark);
+    }
+    .github-link:hover {
+        color: var(--color-accent-dark);
+    }
 }
 
 /* Close button for settings */

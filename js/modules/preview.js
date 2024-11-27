@@ -17,14 +17,59 @@ export class Preview {
         // Create navigation controls
         this.createNavigationControls();
 
-        // Add export button
+        // Add copy and export buttons
         const previewControls = document.querySelector('.preview-controls');
+
+        // Add copy button
+        const copyButton = document.createElement('button');
+        copyButton.className = 'copy-button';
+        copyButton.setAttribute('aria-label', 'Copy HTML to clipboard');
+        copyButton.textContent = 'Copy HTML';
+        copyButton.addEventListener('click', () => this.copyHTML());
+        previewControls.appendChild(copyButton);
+
+        // Add export button
         const exportButton = document.createElement('button');
         exportButton.className = 'export-button';
         exportButton.setAttribute('aria-label', 'Export as HTML');
         exportButton.textContent = 'Export HTML';
         exportButton.addEventListener('click', () => this.exportHTML());
         previewControls.appendChild(exportButton);
+    }
+
+    async copyHTML() {
+        try {
+            // Get the preview content
+            const content = this.element.innerHTML;
+            const title = document.querySelector('h1')?.textContent || 'Exported Story';
+
+            const htmlTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <style>
+        body {
+            max-width: 65ch;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    ${content}
+</body>
+</html>`;
+
+            await navigator.clipboard.writeText(htmlTemplate);
+            this.announceToScreenReader('HTML copied to clipboard');
+        } catch (error) {
+            console.error('Error copying HTML:', error);
+            this.announceToScreenReader('Error copying HTML to clipboard');
+        }
     }
 
     setupEventListeners() {
