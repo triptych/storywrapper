@@ -173,27 +173,33 @@ function enhanceAccessibility(element) {
 
 // Enhance semantic structure
 function enhanceSemantics(element) {
-    // Add article tags around content sections
-    const headers = element.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    headers.forEach(header => {
-        // Create article element
-        const article = document.createElement('article');
+    // Create a temporary container
+    const tempContainer = document.createElement('div');
 
-        // Get all siblings until next header or end
-        let sibling = header.nextSibling;
-        const siblings = [];
-        while (sibling && !sibling.matches?.('h1, h2, h3, h4, h5, h6')) {
-            siblings.push(sibling);
-            sibling = sibling.nextSibling;
+    // Get all headers
+    const headers = Array.from(element.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+
+    // Process each header and its content
+    headers.forEach((header, index) => {
+        const article = document.createElement('article');
+        const headerClone = header.cloneNode(true);
+        article.appendChild(headerClone);
+
+        // Get content until next header or end
+        let currentNode = header.nextElementSibling;
+        const nextHeader = headers[index + 1];
+
+        while (currentNode && currentNode !== nextHeader) {
+            const clone = currentNode.cloneNode(true);
+            article.appendChild(clone);
+            currentNode = currentNode.nextElementSibling;
         }
 
-        // Move header and siblings into article
-        article.appendChild(header);
-        siblings.forEach(sib => article.appendChild(sib));
-
-        // Replace original elements with article
-        element.insertBefore(article, sibling);
+        tempContainer.appendChild(article);
     });
+
+    // Clear original content and append enhanced structure
+    element.innerHTML = tempContainer.innerHTML;
 }
 
 // Export additional utility functions
