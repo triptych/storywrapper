@@ -2,7 +2,7 @@
 class MarkdownProcessor {
     constructor() {
         this.rules = {
-            // Headers
+            // Headers (ATX-style)
             h1: { pattern: /^# (.+)$/gm, replacement: '<h1>$1</h1>' },
             h2: { pattern: /^## (.+)$/gm, replacement: '<h2>$1</h2>' },
             h3: { pattern: /^### (.+)$/gm, replacement: '<h3>$1</h3>' },
@@ -10,38 +10,140 @@ class MarkdownProcessor {
             h5: { pattern: /^##### (.+)$/gm, replacement: '<h5>$1</h5>' },
             h6: { pattern: /^###### (.+)$/gm, replacement: '<h6>$1</h6>' },
 
+            // Headers (Setext-style)
+            setextH1: {
+                pattern: /^(.+)\n=+\n/gm,
+                replacement: '<h1>$1</h1>\n'
+            },
+            setextH2: {
+                pattern: /^(.+)\n-+\n/gm,
+                replacement: '<h2>$1</h2>\n'
+            },
+
             // Emphasis
-            bold: { pattern: /\*\*(.+?)\*\*/g, replacement: '<strong>$1</strong>' },
-            italic: { pattern: /\*(.+?)\*/g, replacement: '<em>$1</em>' },
+            boldAsterisk: { pattern: /\*\*(.+?)\*\*/g, replacement: '<strong>$1</strong>' },
+            boldUnderscore: { pattern: /__(.+?)__/g, replacement: '<strong>$1</strong>' },
+            italicAsterisk: { pattern: /\*(?!\*)([^\s*].*?[^\s*])\*/g, replacement: '<em>$1</em>' },
+            italicUnderscore: { pattern: /_(?!_)([^\s_].*?[^\s_])_/g, replacement: '<em>$1</em>' },
             strikethrough: { pattern: /~~(.+?)~~/g, replacement: '<del>$1</del>' },
 
-            // Lists
+            // Lists (with nesting support)
             unorderedList: {
-                pattern: /^[*+-] (.+)$/gm,
-                replacement: '<li>$1</li>',
-                wrapper: { tag: 'ul', pattern: /(<li>.*?<\/li>(\n|$)+)+/g }
+                pattern: /^( *)[*+-] (.+)$/gm,
+                replacement: (match, indent, content) => {
+                    const level = Math.floor(indent.length / 2);
+                    return `<li data-level="${level}">${content}</li>`;
+                },
+                wrapper: {
+                    tag: 'ul',
+                    pattern: /(<li[^>]*>.*?<\/li>(\n|$)+)+/g,
+                    process: (match) => {
+                        return this.processNestedLists(match, 'ul');
+                    }
+                }
             },
             orderedList: {
-                pattern: /^\d+\. (.+)$/gm,
-                replacement: '<li>$1</li>',
-                wrapper: { tag: 'ol', pattern: /(<li>.*?<\/li>(\n|$)+)+/g }
+                pattern: /^( *)\d+\. (.+)$/gm,
+                replacement: (match, indent, content) => {
+                    const level = Math.floor(indent.length / 2);
+                    return `<li data-level="${level}">${content}</li>`;
+                },
+                wrapper: {
+                    tag: 'ol',
+                    pattern: /(<li[^>]*>.*?<\/li>(\n|$)+)+/g,
+                    process: (match) => {
+                        return this.processNestedLists(match, 'ol');
+                    }
+                }
             },
 
             // Links and Images
-            link: { pattern: /\[(.+?)\]\((.+?)\)/g, replacement: '<a href="$2">$1</a>' },
-            image: { pattern: /!\[(.+?)\]\((.+?)\)/g, replacement: '<img src="$2" alt="$1">' },
-
-            // Code
-            inlineCode: { pattern: /`(.+?)`/g, replacement: '<code>$1</code>' },
-            codeBlock: {
-                pattern: /```([\s\S]*?)```/g,
-                replacement: (match, code) => `<pre><code>${this.escapeHtml(code.trim())}</code></pre>`
+            referenceLink: {
+                pattern: /\[([^\]]+)\]\[([^\]]*)\]/g,
+                replacement: (match, text, id) => {
+                    const refs = this.referenceMap;
+                    const ref = refs[id.toLowerCase()] || refs[text.toLowerCase()];
+                    if (ref) {
+                        const title = ref.title ? ` title="${ref.title}"` : '';
+                        return `<a href="${ref.url}"${title}>${text}</a>`;
+                    }
+                    return match;
+                }
+            },
+            inlineLink: {
+                pattern: /\[([^\]]+)\]\(([^)]+?)(?:\s+"([^"]+)")?\)/g,
+                replacement: (match, text, url, title) => {
+                    const titleAttr = title ? ` title="${title}"` : '';
+                    return `<a href="${url}"${titleAttr}>${text}</a>`;
+                }
+            },
+            referenceImage: {
+                pattern: /!\[([^\]]+)\]\[([^\]]*)\]/g,
+                replacement: (match, alt, id) => {
+                    const refs = this.referenceMap;
+                    const ref = refs[id.toLowerCase()] || refs[alt.toLowerCase()];
+                    if (ref) {
+                        const title = ref.title ? ` title="${ref.title}"` : '';
+                        return `<img src="${ref.url}" alt="${alt}"${title}>`;
+                    }
+                    return match;
+                }
+            },
+            inlineImage: {
+                pattern: /!\[([^\]]+)\]\(([^)]+?)(?:\s+"([^"]+)")?\)/g,
+                replacement: (match, alt, url, title) => {
+                    const titleAttr = title ? ` title="${title}"` : '';
+                    return `<img src="${url}" alt="${alt}"${titleAttr}>`;
+                }
+            },
+            autoLink: {
+                pattern: /<((?:https?|ftp):\/\/[^\s>]+)>/g,
+                replacement: '<a href="$1">$1</a>'
+            },
+            autoEmail: {
+                pattern: /<([^@\s>]+@[^@\s>]+\.[^@\s>]+)>/g,
+                replacement: (match, email) => {
+                    // Encode email to help prevent harvesting
+                    const encoded = email.split('').map(char => {
+                        const rand = Math.random();
+                        return rand > 0.5 ?
+                            `&#x${char.charCodeAt(0).toString(16)};` :
+                            `&#${char.charCodeAt(0)};`;
+                    }).join('');
+                    return `<a href="mailto:${email}">${encoded}</a>`;
+                }
             },
 
-            // Blockquotes
+            // Code
+            inlineCode: {
+                pattern: /(`+)([^`].*?)\1/g,
+                replacement: (match, backticks, code) => {
+                    return `<code>${this.escapeHtml(code.trim())}</code>`;
+                }
+            },
+            codeBlock: {
+                pattern: /```([\s\S]*?)```|(?:^(?: {4}|\t).*\n?)+/gm,
+                replacement: (match) => {
+                    let code = match.startsWith('```') ?
+                        match.slice(3, -3) :
+                        match.replace(/^(?: {4}|\t)/gm, '');
+                    return `<pre><code>${this.escapeHtml(code.trim())}</code></pre>`;
+                }
+            },
+
+            // Blockquotes (with nesting support)
             blockquote: {
-                pattern: /^> (.+)$/gm,
-                replacement: '<blockquote>$1</blockquote>'
+                pattern: /(^>.*\n?)+/gm,
+                replacement: (match) => {
+                    let content = match.replace(/^>\s?/gm, '');
+                    // Process nested blockquotes
+                    while (content.match(/^>/m)) {
+                        content = content.replace(/(^>.*\n?)+/gm, (m) => {
+                            return `<blockquote>${m.replace(/^>\s?/gm, '')}</blockquote>`;
+                        });
+                    }
+                    return `<blockquote>${content}</blockquote>`;
+                }
             },
 
             // Horizontal Rules
@@ -49,15 +151,24 @@ class MarkdownProcessor {
 
             // Paragraphs
             paragraph: {
-                pattern: /^(?!<[a-z]|\s*$)(.+)\s*$/gm,
+                pattern: /^(?!<[a-z]|\s*$)(.+(?:\n.+)*)\n*/gm,
                 replacement: '<p>$1</p>'
             }
         };
+
+        // Initialize reference map
+        this.referenceMap = {};
     }
 
     async process(markdown) {
         try {
             let html = markdown;
+
+            // Process backslash escapes
+            html = this.processBackslashEscapes(html);
+
+            // Extract reference definitions
+            html = this.extractReferences(html);
 
             // Process each rule
             for (const [name, rule] of Object.entries(this.rules)) {
@@ -67,11 +178,74 @@ class MarkdownProcessor {
             // Clean up multiple newlines
             html = html.replace(/\n{2,}/g, '\n');
 
+            // Process inline HTML
+            html = this.processInlineHtml(html);
+
             return html;
         } catch (error) {
             console.error('Error processing markdown:', error);
             throw error;
         }
+    }
+
+    processBackslashEscapes(text) {
+        const escapeChars = '\\`*_{}[]()#+-.!';
+        return text.replace(new RegExp(`\\\\([${escapeChars}])`, 'g'), '$1');
+    }
+
+    extractReferences(text) {
+        const refPattern = /^\[([^\]]+)\]:\s*(\S+)(?:\s+"([^"]+)")?\s*$/gm;
+        return text.replace(refPattern, (match, id, url, title) => {
+            this.referenceMap[id.toLowerCase()] = { url, title };
+            return '';
+        });
+    }
+
+    processNestedLists(match, tag) {
+        const items = match.match(/<li[^>]*>.*?<\/li>/g) || [];
+        const stack = [{ level: -1, content: [] }];
+
+        items.forEach(item => {
+            const levelMatch = item.match(/data-level="(\d+)"/);
+            if (!levelMatch) return;
+
+            const level = parseInt(levelMatch[1]);
+            const cleanItem = item.replace(/\sdata-level="\d+"/, '');
+
+            while (stack.length > 1 && stack[stack.length - 1].level >= level) {
+                const list = stack.pop();
+                stack[stack.length - 1].content.push(
+                    `<${tag}>${list.content.join('')}</${tag}>`
+                );
+            }
+
+            if (level > stack[stack.length - 1].level) {
+                stack.push({ level, content: [cleanItem] });
+            } else {
+                stack[stack.length - 1].content.push(cleanItem);
+            }
+        });
+
+        while (stack.length > 1) {
+            const list = stack.pop();
+            stack[stack.length - 1].content.push(
+                `<${tag}>${list.content.join('')}</${tag}>`
+            );
+        }
+
+        return stack[0].content.join('');
+    }
+
+    processInlineHtml(html) {
+        // Preserve block-level HTML
+        return html.replace(/<(\/?)(div|table|tr|td|th|pre|p|h[1-6]|ul|ol|li|blockquote|hr)[^>]*>/g,
+            (match, slash, tag) => {
+                return `<!--${match}-->`;
+            })
+            .replace(/<!--<(\/?)(div|table|tr|td|th|pre|p|h[1-6]|ul|ol|li|blockquote|hr)[^>]*>-->/g,
+            (match, slash, tag) => {
+                return match.slice(4, -3);
+            });
     }
 
     applyRule(text, rule) {
@@ -80,7 +254,7 @@ class MarkdownProcessor {
             text = text.replace(rule.pattern, rule.replacement);
             text = text.replace(
                 rule.wrapper.pattern,
-                match => `<${rule.wrapper.tag}>${match}</${rule.wrapper.tag}>`
+                rule.wrapper.process || (match => `<${rule.wrapper.tag}>${match}</${rule.wrapper.tag}>`)
             );
         } else {
             // Handle simple replacements
@@ -114,31 +288,18 @@ export async function markdownToHtml(markdown) {
         const html = await processor.process(text);
 
         // Post-process
-        return sanitizeAndEnhance(html);
+        return enhanceAccessibility(html);
     } catch (error) {
         console.error('Error converting markdown to HTML:', error);
         throw error;
     }
 }
 
-// Sanitize and enhance HTML
-function sanitizeAndEnhance(html) {
-    // Create a new DOMParser
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    // Add accessibility enhancements
-    enhanceAccessibility(doc.body);
-
-    // Add semantic structure
-    enhanceSemantics(doc.body);
-
-    // Return enhanced HTML
-    return doc.body.innerHTML;
-}
-
 // Enhance accessibility
-function enhanceAccessibility(element) {
+function enhanceAccessibility(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+
     // Add ARIA roles where needed
     const roleMap = {
         blockquote: 'blockquote',
@@ -147,7 +308,7 @@ function enhanceAccessibility(element) {
     };
 
     // Add roles and other accessibility attributes
-    element.querySelectorAll('*').forEach(el => {
+    div.querySelectorAll('*').forEach(el => {
         const tagName = el.tagName.toLowerCase();
 
         if (roleMap[tagName]) {
@@ -169,44 +330,15 @@ function enhanceAccessibility(element) {
             el.setAttribute('role', 'presentation');
         }
     });
-}
 
-// Enhance semantic structure
-function enhanceSemantics(element) {
-    // Create a temporary container
-    const tempContainer = document.createElement('div');
-
-    // Get all headers
-    const headers = Array.from(element.querySelectorAll('h1, h2, h3, h4, h5, h6'));
-
-    // Process each header and its content
-    headers.forEach((header, index) => {
-        const article = document.createElement('article');
-        const headerClone = header.cloneNode(true);
-        article.appendChild(headerClone);
-
-        // Get content until next header or end
-        let currentNode = header.nextElementSibling;
-        const nextHeader = headers[index + 1];
-
-        while (currentNode && currentNode !== nextHeader) {
-            const clone = currentNode.cloneNode(true);
-            article.appendChild(clone);
-            currentNode = currentNode.nextElementSibling;
-        }
-
-        tempContainer.appendChild(article);
-    });
-
-    // Clear original content and append enhanced structure
-    element.innerHTML = tempContainer.innerHTML;
+    return div.innerHTML;
 }
 
 // Export additional utility functions
 export function extractTableOfContents(html) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const headers = Array.from(doc.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const headers = Array.from(div.querySelectorAll('h1, h2, h3, h4, h5, h6'));
 
     return headers.map(header => ({
         level: parseInt(header.tagName[1]),
