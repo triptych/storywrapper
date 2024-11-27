@@ -1,0 +1,51 @@
+/* Modern CSS Reset */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+body {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    background-color: var(--color-primary-light);
+    color: var(--color-text-light);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+}
+
+/* List Styles */
+ul, ol {
+    padding-left: 2rem;
+    margin: 1rem 0;
+}
+
+ul ul, ul ol, ol ul, ol ol {
+    margin: 0.5rem 0;
+}
+
+li {
+    margin: 0.25rem 0;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: var(--color-primary-dark);
+        color: var(--color-text-dark);
+    }
+}

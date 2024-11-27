@@ -1,0 +1,78 @@
+/* Settings Panel */
+.settings-panel {
+    position: fixed;
+    top: var(--header-height);
+    right: 0;
+    width: 100%;
+    max-width: 320px;
+    height: calc(100vh - var(--header-height));
+    background-color: var(--color-primary-light);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    padding: var(--spacing-unit);
+    transform: translateX(100%);
+    transition: transform var(--transition-speed) var(--transition-timing);
+    z-index: var(--z-modal);
+}
+
+@media (prefers-color-scheme: dark) {
+    .settings-panel {
+        background-color: var(--color-primary-dark);
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.settings-panel[aria-hidden="false"] {
+    transform: translateX(0);
+}
+
+/* Remove hidden attribute display none to allow transitions */
+.settings-panel[hidden] {
+    display: block !important;
+    visibility: visible !important;
+    transform: translateX(100%);
+}
+
+/* Form Controls */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-light);
+}
+
+@media (prefers-color-scheme: dark) {
+    .form-group label {
+        color: var(--color-text-dark);
+    }
+}
+
+/* Close button for settings */
+.close-settings {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--color-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+@media (prefers-color-scheme: dark) {
+    .close-settings {
+        color: var(--color-text-dark);
+    }
+}
+
+.close-settings:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}

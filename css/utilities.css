@@ -1,0 +1,73 @@
+/* Utilities */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Zen Mode Styles */
+.editor-section.zen-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--z-modal);
+    background-color: var(--color-primary-light);
+    padding: 2rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    .editor-section.zen-mode {
+        background-color: var(--color-primary-dark);
+    }
+}
+
+.editor-section.zen-mode .editor-toolbar {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-speed) var(--transition-timing);
+}
+
+.editor-section.zen-mode:hover .editor-toolbar {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Remove max-width constraint in zen mode */
+.editor-section.zen-mode .editor-wrapper {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.editor-section.zen-mode .markdown-editor {
+    width: 100%;
+    max-width: none;
+}
+
+.editor-section.zen-mode ~ .preview-section {
+    display: none;
+}
+
+/* Zen Mode Header/Footer States */
+.editor-section.zen-mode ~ .app-header,
+.editor-section.zen-mode ~ .status-bar {
+    transition: transform var(--transition-speed) var(--transition-timing);
+}
+
+.editor-section.zen-mode ~ .app-header {
+    transform: translateY(-100%);
+}
+
+.editor-section.zen-mode ~ .status-bar {
+    transform: translateY(100%);
+}
