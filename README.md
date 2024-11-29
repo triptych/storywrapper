@@ -35,6 +35,113 @@ npm install
 npm start
 ```
 
+## Building Windows Executable
+
+### Icon Preparation
+
+The Windows executable requires an ICO format icon. Here's how to convert SVG to ICO:
+
+1. Install required packages:
+
+```bash
+npm install sharp png-to-ico
+```
+
+2. Create a conversion script (convert-icon.js):
+
+```javascript
+const sharp = require('sharp');
+const pngToIco = require('png-to-ico');
+const path = require('path');
+const fs = require('fs');
+
+const inputPath = path.join(__dirname, 'icons', 'icon-512x512.svg');
+const pngPath = path.join(__dirname, 'build', 'icon.png');
+const outputPath = path.join(__dirname, 'build', 'icon.ico');
+
+// Ensure build directory exists
+if (!fs.existsSync('build')) {
+    fs.mkdirSync('build');
+}
+
+async function convertToIco() {
+    try {
+        // First convert to SVG to PNG
+        await sharp(inputPath)
+            .resize(256, 256)
+            .png()
+            .toFile(pngPath);
+
+        // Then convert PNG to ICO
+        const buf = await pngToIco([pngPath]);
+        fs.writeFileSync(outputPath, buf);
+
+        console.log('Icon converted successfully!');
+    } catch (err) {
+        console.error('Error converting icon:', err);
+    }
+}
+
+convertToIco();
+```
+
+3. Run the conversion script:
+
+```bash
+node convert-icon.js
+```
+
+### Build Configuration
+
+Configure package.json with the following build settings to avoid permission issues and ensure proper icon usage:
+
+```json
+{
+  "build": {
+    "appId": "com.storywrapper.app",
+    "win": {
+      "target": "portable",
+      "icon": "build/icon.ico"
+    },
+    "asar": true,
+    "forceCodeSigning": false
+  },
+  "scripts": {
+    "build": "electron-builder --win portable --config.win.signAndEditExecutable=false"
+  }
+}
+```
+
+Key points in the configuration:
+
+- Use `portable` target to avoid installation/permission issues
+- Disable code signing with `forceCodeSigning: false`
+- Use `--config.win.signAndEditExecutable=false` in build command
+- Specify the ICO file path in the `win.icon` setting
+
+### Building the Executable
+
+1. Install electron-builder:
+
+```bash
+npm install electron-builder --save-dev
+```
+
+2. Run the build command:
+
+```bash
+npm run build
+```
+
+The executable will be created in the `dist` directory as `storywrapper 1.0.0.exe`.
+
+### Troubleshooting
+
+- If you encounter symbolic link errors, use the portable target and disable code signing
+- If icon conversion fails with sharp alone, use the png-to-ico package as an intermediate step
+- Make sure the build directory exists before running the icon conversion
+- The final ICO file should be placed in the build directory as specified in the package.json
+
 ## Keyboard Shortcuts
 
 - `Ctrl/Cmd + O`: Open file
