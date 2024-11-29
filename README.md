@@ -135,6 +135,38 @@ npm run build
 
 The executable will be created in the `dist` directory as `storywrapper 1.0.0.exe`.
 
+### Creating a Release
+
+1. Create a zip file of the executable:
+
+```powershell
+# Using PowerShell
+Compress-Archive -Path "dist/storywrapper 1.0.0.exe" -DestinationPath "dist/storywrapper-1.0.0-win-x64.zip"
+```
+
+2. Using GitHub CLI to create a release:
+   - First, install GitHub CLI and authenticate:
+
+   ```bash
+   # Install GitHub CLI from: https://cli.github.com/
+   gh auth login  # Follow the interactive prompts
+   ```
+
+   - Create the release with the zip file:
+
+   ```powershell
+   # Using PowerShell
+   & 'C:\Program Files\GitHub CLI\gh.exe' release create v1.0.0 --title 'Story Wrapper v1.0.0' --notes 'Initial Windows release of Story Wrapper' './dist/storywrapper-1.0.0-win-x64.zip#Windows Portable Executable'
+   ```
+
+   Alternatively, you can create a release manually through the GitHub web interface:
+   1. Go to your GitHub repository
+   2. Click on "Releases" in the right sidebar
+   3. Click "Create a new release"
+   4. Set the tag version, title, and description
+   5. Upload the zip file
+   6. Click "Publish release"
+
 ### Troubleshooting
 
 - If you encounter symbolic link errors, use the portable target and disable code signing
