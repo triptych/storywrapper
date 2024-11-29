@@ -45,13 +45,6 @@ class App {
             );
         });
 
-        // Close settings button
-        const closeSettings = document.querySelector('.close-settings');
-        closeSettings?.addEventListener('click', () => {
-            this.settings.close();
-            document.querySelector('.settings-toggle').setAttribute('aria-expanded', 'false');
-        });
-
         // Navigation (excluding settings button)
         document.querySelectorAll('.nav-link:not(.settings-toggle)').forEach(link => {
             link.addEventListener('click', (e) => {
