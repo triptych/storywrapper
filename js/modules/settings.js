@@ -25,8 +25,8 @@ export class Settings {
         this.element.setAttribute('role', 'dialog');
         this.element.setAttribute('aria-label', 'Settings panel');
 
-        // Create close button
-        this.createCloseButton();
+        // Setup close button
+        this.setupCloseButton();
 
         // Add additional form controls
         this.addAccessibilityControls();
@@ -35,14 +35,12 @@ export class Settings {
         this.loadSettings();
     }
 
-    createCloseButton() {
-        const closeButton = document.createElement('button');
-        closeButton.className = 'close-settings';
-        closeButton.setAttribute('aria-label', 'Close settings');
-        closeButton.innerHTML = '×';
-        closeButton.addEventListener('click', () => this.close());
-
-        this.element.insertBefore(closeButton, this.element.firstChild);
+    setupCloseButton() {
+        // Instead of creating a new button, find the existing one
+        const closeButton = this.element.querySelector('.close-settings');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => this.close());
+        }
     }
 
     addAccessibilityControls() {

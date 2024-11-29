@@ -25,11 +25,9 @@
     transform: translateX(0);
 }
 
-/* Remove hidden attribute display none to allow transitions */
+/* Handle hidden state */
 .settings-panel[hidden] {
-    display: block !important;
-    visibility: visible !important;
-    transform: translateX(100%);
+    display: none;
 }
 
 /* Form Controls */
@@ -52,19 +50,24 @@
 /* Close button for settings */
 .close-settings {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 30px;
-    height: 30px;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 32px;
+    height: 32px;
     border: none;
-    background: none;
+    background: transparent;
     cursor: pointer;
-    font-size: 1.5rem;
+    font-size: 24px;
+    line-height: 1;
     color: var(--color-text-light);
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    z-index: calc(var(--z-modal) + 10);
+    padding: 0;
+    margin: 0;
+    transition: background-color 0.2s ease;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -73,6 +76,44 @@
     }
 }
 
-.close-settings:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+.close-settings:hover,
+.close-settings:focus {
+    background-color: rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+.close-settings:active {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Settings Content */
+.settings-content {
+    height: 100%;
+    overflow-y: auto;
+    padding-top: 2.5rem; /* Give space for close button */
+}
+
+/* Settings Form */
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+legend {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--color-text-light);
+}
+
+@media (prefers-color-scheme: dark) {
+    legend {
+        color: var(--color-text-dark);
+    }
 }

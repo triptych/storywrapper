@@ -1,0 +1,20 @@
+{
+  "name": "storywrapper",
+  "version": "1.0.0",
+  "description": "Electron wrapper for markdown editor web app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "electron",
+    "markdown",
+    "editor"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^25.3.1"
+  }
+}
