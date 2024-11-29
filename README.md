@@ -119,7 +119,41 @@ Key points in the configuration:
 - Use `--config.win.signAndEditExecutable=false` in build command
 - Specify the ICO file path in the `win.icon` setting
 
-### Building the Executable
+### Building and Releasing
+
+There are two ways to build and release the application:
+
+#### 1. Automated Release Process
+
+A PowerShell script is provided to automate the entire release process. This script handles:
+
+- Icon conversion
+- Building the executable
+- Creating a zip file
+- Creating a GitHub release
+
+Prerequisites:
+
+- GitHub CLI (gh) installed and authenticated
+- PowerShell
+- All development dependencies installed
+
+Usage:
+
+```powershell
+.\scripts\release-builder.ps1 -Version "1.0.0" -Notes "Release notes here"
+```
+
+The script will:
+
+1. Convert the icon using convert-icon.js
+2. Build the executable using electron-builder
+3. Create a zip file of the executable
+4. Create a GitHub release with the specified version and notes
+
+#### 2. Manual Process
+
+If you prefer to build manually, follow these steps:
 
 1. Install electron-builder:
 
@@ -135,37 +169,27 @@ npm run build
 
 The executable will be created in the `dist` directory as `storywrapper 1.0.0.exe`.
 
-### Creating a Release
-
-1. Create a zip file of the executable:
+3. Create a zip file of the executable:
 
 ```powershell
 # Using PowerShell
 Compress-Archive -Path "dist/storywrapper 1.0.0.exe" -DestinationPath "dist/storywrapper-1.0.0-win-x64.zip"
 ```
 
-2. Using GitHub CLI to create a release:
-   - First, install GitHub CLI and authenticate:
+4. Create the release using GitHub CLI:
 
-   ```bash
-   # Install GitHub CLI from: https://cli.github.com/
-   gh auth login  # Follow the interactive prompts
-   ```
+```powershell
+gh release create v1.0.0 --title 'Story Wrapper v1.0.0' --notes 'Release notes' './dist/storywrapper-1.0.0-win-x64.zip#Windows Portable Executable'
+```
 
-   - Create the release with the zip file:
+Or create the release manually through the GitHub web interface:
 
-   ```powershell
-   # Using PowerShell
-   & 'C:\Program Files\GitHub CLI\gh.exe' release create v1.0.0 --title 'Story Wrapper v1.0.0' --notes 'Initial Windows release of Story Wrapper' './dist/storywrapper-1.0.0-win-x64.zip#Windows Portable Executable'
-   ```
-
-   Alternatively, you can create a release manually through the GitHub web interface:
-   1. Go to your GitHub repository
-   2. Click on "Releases" in the right sidebar
-   3. Click "Create a new release"
-   4. Set the tag version, title, and description
-   5. Upload the zip file
-   6. Click "Publish release"
+1. Go to your GitHub repository
+2. Click on "Releases" in the right sidebar
+3. Click "Create a new release"
+4. Set the tag version, title, and description
+5. Upload the zip file
+6. Click "Publish release"
 
 ### Troubleshooting
 
