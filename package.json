@@ -30,6 +30,11 @@
     "sharp": "^0.33.0"
   },
   "dependencies": {
+    "@codemirror/basic-setup": "^0.20.0",
+    "@codemirror/commands": "^6.3.0",
+    "@codemirror/lang-markdown": "^6.2.0",
+    "@codemirror/state": "^6.3.0",
+    "@codemirror/view": "^6.21.0",
     "png-to-ico": "^2.1.8"
   }
 }

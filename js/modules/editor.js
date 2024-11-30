@@ -1,6 +1,15 @@
 import { debounce } from '../utils/helpers.js';
 import { markdownToHtml } from '../utils/markdown.js';
 
+// Import CodeMirror from CDN to avoid module loading issues
+const script1 = document.createElement('script');
+script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js';
+document.head.appendChild(script1);
+
+const script2 = document.createElement('script');
+script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/markdown/markdown.min.js';
+document.head.appendChild(script2);
+
 export class Editor {
     constructor({ element, storage }) {
         this.element = element;
@@ -11,38 +20,35 @@ export class Editor {
         this.editorSection = document.querySelector('.editor-section');
         this.zenModeButton = document.querySelector('[aria-label="Toggle Zen mode"]');
 
-        this.setupEditor();
-        this.setupToolbar();
+        // Wait for CodeMirror to load
+        script1.onload = () => {
+            script2.onload = () => {
+                this.setupEditor();
+                this.setupToolbar();
+            };
+        };
     }
 
     setupEditor() {
-        // Initialize editor event listeners
-        this.element.addEventListener('input', debounce(() => {
+        // Initialize CodeMirror
+        this.editor = CodeMirror(this.element, {
+            mode: 'markdown',
+            theme: 'default',
+            lineNumbers: true,
+            lineWrapping: true,
+            autofocus: true,
+            tabSize: 2,
+            indentWithTabs: false,
+            viewportMargin: Infinity,
+            extraKeys: {
+                'Enter': 'newlineAndIndentContinueMarkdownList'
+            }
+        });
+
+        // Set up change handler
+        this.editor.on('change', debounce(() => {
             this.handleInput();
         }, this.autosaveDelay));
-
-        // Handle paste events to clean up content
-        this.element.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = e.clipboardData.getData('text/plain');
-            document.execCommand('insertText', false, text);
-        });
-
-        // Handle drag and drop
-        this.element.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const text = e.dataTransfer.getData('text/plain');
-            this.element.value = text;
-            this.handleInput();
-        });
-
-        // Setup auto-resize
-        this.element.addEventListener('input', () => {
-            this.autoResize();
-        });
-
-        // Initial auto-resize
-        this.autoResize();
 
         // Handle Escape key in Zen mode
         document.addEventListener('keydown', (e) => {
@@ -91,7 +97,7 @@ export class Editor {
 
         // Focus the editor in Zen mode
         if (isZenMode) {
-            this.element.focus();
+            this.editor.focus();
         }
     }
 
@@ -107,7 +113,7 @@ export class Editor {
     }
 
     async handleInput() {
-        const content = this.element.value;
+        const content = this.editor.getValue();
 
         // Update word count
         this.updateWordCount(content);
@@ -132,27 +138,13 @@ export class Editor {
     }
 
     wrapSelection(wrapper, endWrapper = wrapper) {
-        const start = this.element.selectionStart;
-        const end = this.element.selectionEnd;
-        const selection = this.element.value.substring(start, end);
+        const selection = this.editor.getSelection();
         const newText = `${wrapper}${selection}${endWrapper}`;
-
-        // Insert the wrapped text
-        document.execCommand('insertText', false, newText);
-
-        // Update the preview
-        this.handleInput();
-
-        // Restore focus
-        this.element.focus();
+        this.editor.replaceSelection(newText);
+        this.editor.focus();
     }
 
-    autoResize() {
-        this.element.style.height = 'auto';
-        this.element.style.height = `${this.element.scrollHeight}px`;
-    }
-
-    async save(content = this.element.value) {
+    async save(content) {
         try {
             this.updateSaveStatus('Saving...');
             await this.storage.set('content', content);
@@ -174,32 +166,20 @@ export class Editor {
     }
 
     setContent(content) {
-        this.element.value = content;
-        this.handleInput();
+        this.editor.setValue(content);
     }
 
     getContent() {
-        return this.element.value;
+        return this.editor.getValue();
     }
 
     // Public method to get selected text
     getSelection() {
-        return this.element.value.substring(
-            this.element.selectionStart,
-            this.element.selectionEnd
-        );
+        return this.editor.getSelection();
     }
 
     // Public method to insert text at cursor position
     insertAtCursor(text) {
-        const start = this.element.selectionStart;
-        const end = this.element.selectionEnd;
-        const before = this.element.value.substring(0, start);
-        const after = this.element.value.substring(end);
-
-        this.element.value = before + text + after;
-        this.element.selectionStart = this.element.selectionEnd = start + text.length;
-
-        this.handleInput();
+        this.editor.replaceSelection(text);
     }
 }
