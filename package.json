@@ -1,6 +1,6 @@
 {
   "name": "storywrapper",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Electron wrapper for markdown editor web app",
   "main": "main.js",
   "scripts": {
