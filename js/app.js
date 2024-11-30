@@ -5,6 +5,7 @@ import { Settings } from './modules/settings.js';
 import { ThemeManager } from './modules/theme.js';
 import { StorageManager } from './modules/storage.js';
 import { ServiceWorkerManager } from './modules/sw-manager.js';
+import { markdownToHtml } from './utils/markdown.js';
 
 class App {
     constructor() {
@@ -124,7 +125,9 @@ class App {
             const savedContent = await storage?.get('content');
             if (savedContent) {
                 editor?.setContent(savedContent);
-                preview?.update(savedContent);
+                // Convert markdown to HTML before updating preview
+                const html = await markdownToHtml(savedContent);
+                preview?.update(html);
             }
 
             // Load saved settings

@@ -128,9 +128,9 @@ export class Editor {
             // Convert markdown to HTML for preview
             const html = await markdownToHtml(content);
 
-            // Dispatch custom event for preview update
+            // Dispatch custom event with resolved HTML
             const previewEvent = new CustomEvent('preview-update', {
-                detail: { html }
+                detail: { html: html }  // Pass the resolved HTML, not the promise
             });
             window.dispatchEvent(previewEvent);
 

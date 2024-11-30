@@ -9,6 +9,7 @@ export class Preview {
         this.boundHandleTouchStart = this.handleTouchStart.bind(this);
         this.boundHandleTouchEnd = this.handleTouchEnd.bind(this);
         this.touchStartX = 0;
+        this.currentHTML = ''; // Store the current HTML content
 
         this.setupPreview();
         this.setupEventListeners();
@@ -77,7 +78,8 @@ export class Preview {
         this.setupIntersectionObserver();
     }
 
-    handlePreviewUpdate = (e) => {
+    handlePreviewUpdate(e) {
+        // e.detail.html is now the resolved HTML string
         this.update(e.detail.html);
     }
 
@@ -169,7 +171,7 @@ export class Preview {
 
     async copyHTML() {
         try {
-            const htmlContent = this.generateExportHTML();
+            const htmlContent = await this.generateExportHTML();
             await navigator.clipboard.writeText(htmlContent);
             this.announceToScreenReader('HTML copied to clipboard');
         } catch (error) {
@@ -181,7 +183,7 @@ export class Preview {
     async exportHTML() {
         try {
             this.announceToScreenReader('Preparing export...');
-            const htmlContent = this.generateExportHTML();
+            const htmlContent = await this.generateExportHTML();
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const filename = `story-${timestamp}.html`;
 
@@ -215,7 +217,8 @@ export class Preview {
             css = this.getFallbackStyles();
         }
 
-        const content = this.element.innerHTML;
+        // Use the stored HTML content instead of element.innerHTML
+        const content = this.currentHTML;
         const title = document.querySelector('h1')?.textContent || 'Exported Story';
 
         return `<!DOCTYPE html>
@@ -277,6 +280,15 @@ export class Preview {
 
     update(html) {
         if (!html || !this.element) return;
+
+        // Ensure we have a string, not a promise
+        if (html instanceof Promise) {
+            console.error('Received a promise instead of HTML string');
+            return;
+        }
+
+        // Store the current HTML content
+        this.currentHTML = html;
 
         // Set the HTML content directly
         this.element.innerHTML = html;
