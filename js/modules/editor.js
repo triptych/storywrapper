@@ -1,15 +1,6 @@
 import { debounce } from '../utils/helpers.js';
 import { markdownToHtml } from '../utils/markdown.js';
 
-// Import CodeMirror from CDN to avoid module loading issues
-const script1 = document.createElement('script');
-script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js';
-document.head.appendChild(script1);
-
-const script2 = document.createElement('script');
-script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/markdown/markdown.min.js';
-document.head.appendChild(script2);
-
 export class Editor {
     constructor({ element, storage }) {
         this.element = element;
@@ -20,13 +11,9 @@ export class Editor {
         this.editorSection = document.querySelector('.editor-section');
         this.zenModeButton = document.querySelector('[aria-label="Toggle Zen mode"]');
 
-        // Wait for CodeMirror to load
-        script1.onload = () => {
-            script2.onload = () => {
-                this.setupEditor();
-                this.setupToolbar();
-            };
-        };
+        // Initialize editor immediately since CodeMirror is already loaded
+        this.setupEditor();
+        this.setupToolbar();
     }
 
     setupEditor() {

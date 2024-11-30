@@ -24,7 +24,23 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
-        <!-- Defer non-critical JavaScript -->
+        <!-- External Scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/markdown/markdown.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script>
+            // Configure marked options once loaded
+            marked.setOptions({
+                gfm: true,
+                breaks: true,
+                headerIds: true,
+                mangle: false,
+                smartLists: true,
+                smartypants: true
+            });
+        </script>
+
+        <!-- Defer app JavaScript -->
         <script src="js/app.js" type="module" defer="defer"></script>
     </head>
     <body>
