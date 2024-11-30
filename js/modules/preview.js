@@ -197,27 +197,101 @@ export class Preview {
         }
     }
 
-    async generateExportHTML() {
-        // Get the CSS content
-        const cssLink = document.querySelector('link[href*="main.css"]');
-        const cssPath = cssLink?.getAttribute('href')?.split('?')[0]; // Remove cache-busting query
-        let css = '';
+    generateExportHTML() {
+        // Combine all CSS styles
+        const css = `
+            /* Variables */
+            :root {
+                /* Theme Colors */
+                --color-primary-light: #ffffff;
+                --color-secondary-light: #f5f5f5;
+                --color-text-light: #333333;
+                --color-accent-light: #0066cc;
 
-        if (cssPath) {
-            try {
-                const cssResponse = await fetch(cssPath);
-                if (cssResponse.ok) {
-                    css = await cssResponse.text();
-                }
-            } catch (error) {
-                console.warn('Failed to load CSS, using fallback styles');
-                css = this.getFallbackStyles();
+                --color-primary-dark: #1a1a1a;
+                --color-secondary-dark: #2d2d2d;
+                --color-text-dark: #f0f0f0;
+                --color-accent-dark: #66b3ff;
+
+                /* Typography */
+                --font-serif: 'Merriweather', serif;
+                --font-sans: system-ui, -apple-system, sans-serif;
+                --font-size-base: clamp(1rem, 1vw + 0.75rem, 1.25rem);
+                --line-height-base: 1.6;
+
+                /* Spacing */
+                --spacing-unit: clamp(1rem, 2vw, 2rem);
+                --content-width: min(65ch, 100% - 2rem);
             }
-        } else {
-            css = this.getFallbackStyles();
-        }
 
-        // Use the stored HTML content instead of element.innerHTML
+            /* Reset */
+            *, *::before, *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            html {
+                font-size: 16px;
+                scroll-behavior: smooth;
+                height: 100%;
+            }
+
+            body {
+                font-family: var(--font-sans);
+                font-size: var(--font-size-base);
+                line-height: var(--line-height-base);
+                background-color: var(--color-primary-light);
+                color: var(--color-text-light);
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                max-width: var(--content-width);
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            /* List Styles */
+            ul, ol {
+                padding-left: 2rem;
+                margin: 1rem 0;
+            }
+
+            ul ul, ul ol, ol ul, ol ol {
+                margin: 0.5rem 0;
+            }
+
+            li {
+                margin: 0.25rem 0;
+            }
+
+            /* Preview Content Styles */
+            .preview-content {
+                padding: 2rem;
+                border-radius: 4px;
+            }
+
+            /* Dark Mode */
+            @media (prefers-color-scheme: dark) {
+                body {
+                    background-color: var(--color-primary-dark);
+                    color: var(--color-text-dark);
+                }
+            }
+
+            /* Print Styles */
+            @media print {
+                body {
+                    max-width: none;
+                    margin: 0;
+                    padding: 0;
+                }
+                .preview-content {
+                    padding: 0;
+                }
+            }
+        `;
+
+        // Use the stored HTML content
         const content = this.currentHTML;
         const title = document.querySelector('h1')?.textContent || 'Exported Story';
 
@@ -227,31 +301,7 @@ export class Preview {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
-    <style>
-        ${css}
-        /* Export-specific styles */
-        :root {
-            --content-width: min(65ch, 100% - 2rem);
-        }
-        body {
-            max-width: var(--content-width);
-            margin: 2rem auto;
-            padding: 0 1rem;
-            font-family: system-ui, -apple-system, sans-serif;
-            line-height: 1.6;
-        }
-        .preview-content {
-            padding: 2rem;
-            border-radius: 4px;
-        }
-        @media print {
-            body {
-                max-width: none;
-                margin: 0;
-                padding: 0;
-            }
-        }
-    </style>
+    <style>${css}</style>
 </head>
 <body>
     <div class="preview-content">
